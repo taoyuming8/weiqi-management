@@ -1,0 +1,45 @@
+{% extends 'hod_templates/base.html' %}
+{% block content %}
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+  <div class="card">
+    <div class="card-title">发送教练通知</div>
+    <form method="post">
+      {% csrf_token %}
+      <div class="form-group">
+        <label>选择教练</label>
+        <select name="coach_id" required>
+          <option value="">-- 请选择教练 --</option>
+          {% for c in coaches %}
+            <option value="{{ c.id }}">
+              {{ c.admin.get_full_name|default:c.admin.username }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label>通知内容</label>
+        <textarea name="message" rows="4" placeholder="请输入通知内容..."
+          style="width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:7px;font-size:14px;font-family:inherit;resize:vertical" required></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary">发送通知</button>
+    </form>
+  </div>
+  <div class="card">
+    <div class="card-title">教练列表</div>
+    <table>
+      <thead><tr><th>姓名</th><th>用户名</th><th>邮箱</th></tr></thead>
+      <tbody>
+        {% for c in coaches %}
+        <tr>
+          <td>{{ c.admin.get_full_name|default:c.admin.username }}</td>
+          <td>{{ c.admin.username }}</td>
+          <td>{{ c.admin.email|default:"—" }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="3" style="text-align:center;color:#aaa;padding:20px">暂无教练</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

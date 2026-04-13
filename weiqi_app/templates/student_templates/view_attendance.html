@@ -1,0 +1,60 @@
+{% extends 'student_templates/base.html' %}
+{% block content %}
+<div class="card">
+  <div class="card-title">选择课程查看考勤</div>
+  <div class="form-group" style="max-width:400px">
+    <label>课程</label>
+    <select id="subject_select">
+      <option value="">-- 请选择课程 --</option>
+      {% for s in subjects %}
+        <option value="{{ s.id }}">{{ s.name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <button class="btn btn-primary" onclick="loadAttendance()">🔍 查看考勤</button>
+</div>
+
+<div id="attendance_section" style="display:none">
+  <div class="card">
+    <div class="card-title" id="att_title">考勤记录</div>
+    <div id="att_summary" style="margin-bottom:16px;font-size:14px;color:#555"></div>
+    <table>
+      <thead><tr><th>#</th><th>上课日期</th><th>出勤状态</th></tr></thead>
+      <tbody id="att_tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+function loadAttendance() {
+  const subject = document.getElementById('subject_select').value;
+  if (!subject) { alert('请选择课程'); return; }
+  fetch(`/get_attendance_student?subject=${subject}`)
+    .then(r => r.json())
+    .then(data => {
+      const tbody = document.getElementById('att_tbody');
+      tbody.innerHTML = '';
+      let present = 0;
+      data.attendance.forEach((a, i) => {
+        if (a.status) present++;
+        tbody.innerHTML += `
+          <tr>
+            <td>${i+1}</td>
+            <td>${a.date}</td>
+            <td>${a.status
+              ? '<span class="badge badge-success">✅ 出勤</span>'
+              : '<span class="badge badge-danger">❌ 缺席</span>'
+            }</td>
+          </tr>`;
+      });
+      const total = data.attendance.length;
+      const rate  = total ? Math.round(present/total*100) : 0;
+      document.getElementById('att_summary').innerHTML =
+        `共 <b>${total}</b> 课次 | 出勤 <b style="color:#2e7d32">${present}</b> 次 | 缺席 <b style="color:#c62828">${total-present}</b> 次 | 出勤率 <b>${rate}%</b>`;
+      const name = document.getElementById('subject_select').selectedOptions[0].text;
+      document.getElementById('att_title').textContent = `「${name}」考勤记录`;
+      document.getElementById('attendance_section').style.display = 'block';
+    });
+}
+</script>
+{% endblock %}

@@ -1,0 +1,33 @@
+{% extends 'hod_templates/base.html' %}
+{% block content %}
+<div class="card">
+  <div class="card-title">
+    教练列表
+    <a href="/add_coach" class="btn btn-primary">＋ 添加教练</a>
+  </div>
+  <table>
+    <thead>
+      <tr><th>#</th><th>姓名</th><th>用户名</th><th>邮箱</th><th>地址</th><th>操作</th></tr>
+    </thead>
+    <tbody>
+      {% for c in coaches %}
+      <tr>
+        <td>{{ forloop.counter }}</td>
+        <td>{{ c.admin.get_full_name|default:c.admin.username }}</td>
+        <td>{{ c.admin.username }}</td>
+        <td>{{ c.admin.email }}</td>
+        <td>{{ c.address|default:"—" }}</td>
+        <td>
+          <a href="/edit_coach/{{ c.id }}" class="btn btn-warning btn-sm">编辑</a>
+          <a href="/delete_coach/{{ c.id }}"
+             onclick="return confirm('确认删除教练？')"
+             class="btn btn-danger btn-sm">删除</a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="6" style="text-align:center;color:#aaa;padding:30px">暂无教练</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

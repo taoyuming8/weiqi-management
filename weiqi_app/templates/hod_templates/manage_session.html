@@ -1,0 +1,30 @@
+{% extends 'hod_templates/base.html' %}
+{% block content %}
+<div class="card">
+  <div class="card-title">
+    训练期列表
+    <a href="/add_session" class="btn btn-primary">＋ 添加训练期</a>
+  </div>
+  <table>
+    <thead>
+      <tr><th>#</th><th>开始日期</th><th>结束日期</th><th>操作</th></tr>
+    </thead>
+    <tbody>
+      {% for s in sessions %}
+      <tr>
+        <td>{{ forloop.counter }}</td>
+        <td>{{ s.session_start }}</td>
+        <td>{{ s.session_end }}</td>
+        <td>
+          <a href="/delete_session/{{ s.id }}"
+             onclick="return confirm('确认删除此训练期？')"
+             class="btn btn-danger btn-sm">删除</a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="4" style="text-align:center;color:#aaa;padding:30px">暂无训练期</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

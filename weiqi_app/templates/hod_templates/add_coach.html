@@ -1,0 +1,45 @@
+{% extends 'hod_templates/base.html' %}
+{% block content %}
+<div class="card" style="max-width:600px">
+  <div class="card-title">添加教练</div>
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="form-row">
+      <div class="form-group">
+        <label>姓（名字）</label>
+        <input type="text" name="first_name" required>
+      </div>
+      <div class="form-group">
+        <label>姓氏</label>
+        <input type="text" name="last_name" required>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>用户名</label>
+        <input type="text" name="username" required>
+      </div>
+      <div class="form-group">
+        <label>邮箱</label>
+        <input type="email" name="email">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>密码</label>
+      <input type="password" name="password" required>
+    </div>
+    <div class="form-group">
+      <label>地址</label>
+      <input type="text" name="address">
+    </div>
+    <div class="form-group">
+      <label>头像（可选）</label>
+      <input type="file" name="profile_pic" accept="image/*">
+    </div>
+    <div style="display:flex;gap:12px">
+      <button type="submit" class="btn btn-primary">确认添加</button>
+      <a href="/manage_coach" class="btn" style="background:#eee;color:#444">取消</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

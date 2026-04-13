@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>围棋培训管理系统</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      min-height: 100vh; display: flex; align-items: center;
+      justify-content: center; background: #1a1a2e;
+      font-family: 'Microsoft YaHei', sans-serif;
+    }
+    .card {
+      background: #fff; border-radius: 12px; padding: 48px 40px;
+      width: 400px; box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    }
+    .logo { text-align: center; margin-bottom: 32px; }
+    .logo .stone {
+      width: 56px; height: 56px; background: #1a1a2e; border-radius: 50%;
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: 28px; margin-bottom: 12px;
+    }
+    h1 { font-size: 20px; color: #1a1a2e; font-weight: 600; }
+
+    /* 标签切换 */
+    .tabs {
+      display: flex; border-bottom: 2px solid #f0f0f0;
+      margin-bottom: 24px; margin-top: 4px;
+    }
+    .tab {
+      flex: 1; text-align: center; padding: 10px 0;
+      font-size: 14px; font-weight: 600; color: #aaa;
+      cursor: pointer; border-bottom: 2px solid transparent;
+      margin-bottom: -2px; transition: color .2s, border-color .2s;
+    }
+    .tab.active { color: #1a1a2e; border-bottom-color: #1a1a2e; }
+
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    .alert {
+      background: #fff0f0; border: 1px solid #ffcdd2;
+      color: #c62828; border-radius: 6px;
+      padding: 10px 14px; font-size: 13px; margin-bottom: 16px;
+    }
+    .alert-success {
+      background: #f0fff4; border: 1px solid #a5d6a7;
+      color: #2e7d32;
+    }
+    label {
+      display: block; font-size: 13px; color: #444;
+      margin-bottom: 6px; margin-top: 16px; font-weight: 500;
+    }
+    input[type=text], input[type=password], input[type=email], select {
+      width: 100%; padding: 10px 14px; border: 1px solid #ddd;
+      border-radius: 8px; font-size: 15px; outline: none;
+      transition: border-color .2s; font-family: inherit;
+    }
+    input:focus, select:focus { border-color: #1a1a2e; }
+    button {
+      width: 100%; margin-top: 24px; padding: 12px;
+      background: #1a1a2e; color: #fff; border: none;
+      border-radius: 8px; font-size: 15px; cursor: pointer;
+      font-family: inherit; letter-spacing: 1px;
+    }
+    button:hover { background: #2d2d4e; }
+    .footer { text-align: center; font-size: 12px; color: #bbb; margin-top: 24px; }
+
+    /* 角色选择 */
+    .role-group {
+      display: flex; gap: 10px; margin-top: 16px;
+    }
+    .role-btn {
+      flex: 1; padding: 10px 6px; border: 2px solid #e0e0e0;
+      border-radius: 8px; text-align: center; cursor: pointer;
+      font-size: 13px; color: #666; transition: all .2s;
+      background: #fff;
+    }
+    .role-btn:hover { border-color: #1a1a2e; color: #1a1a2e; }
+    .role-btn.selected { border-color: #1a1a2e; background: #1a1a2e; color: #fff; }
+    .role-btn .role-icon { font-size: 20px; display: block; margin-bottom: 4px; }
+    #reg_user_type { display: none; }
+  </style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">
+    <div class="stone">⚫</div>
+    <h1>围棋培训管理系统</h1>
+  </div>
+
+  {% if messages %}
+    {% for msg in messages %}
+      <div class="alert {% if 'success' in msg.tags %}alert-success{% endif %}">{{ msg }}</div>
+    {% endfor %}
+  {% endif %}
+
+  <!-- 标签 -->
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('login')">登 录</div>
+    <div class="tab" onclick="switchTab('register')">注 册</div>
+  </div>
+
+  <!-- 登录面板 -->
+  <div class="panel active" id="panel_login">
+    <form method="post" action="/doLogin">
+      {% csrf_token %}
+      <label for="username">用户名</label>
+      <input type="text" id="username" name="username" placeholder="请输入用户名" autofocus>
+      <label for="password">密码</label>
+      <input type="password" id="password" name="password" placeholder="请输入密码">
+      <button type="submit">登 录</button>
+    </form>
+  </div>
+
+  <!-- 注册面板 -->
+  <div class="panel" id="panel_register">
+    <form method="post" action="/doRegister">
+      {% csrf_token %}
+      <input type="hidden" name="user_type" id="reg_user_type" value="3">
+
+      <label>注册身份</label>
+      <div class="role-group">
+        <div class="role-btn" onclick="selectRole(this, '1')">
+          <span class="role-icon">🏛️</span>管理员
+        </div>
+        <div class="role-btn" onclick="selectRole(this, '2')">
+          <span class="role-icon">👨‍🏫</span>教练
+        </div>
+        <div class="role-btn selected" onclick="selectRole(this, '3')">
+          <span class="role-icon">🧒</span>学员
+        </div>
+      </div>
+
+      <label>姓名</label>
+      <div style="display:flex;gap:10px">
+        <input type="text" name="last_name" placeholder="姓" style="flex:1">
+        <input type="text" name="first_name" placeholder="名" style="flex:2">
+      </div>
+
+      <label>用户名</label>
+      <input type="text" name="username" placeholder="用于登录的用户名" required>
+
+      <label>邮箱</label>
+      <input type="email" name="email" placeholder="邮箱地址（可选）">
+
+      <label>密码</label>
+      <input type="password" name="password" placeholder="至少8位" required>
+
+      <label>确认密码</label>
+      <input type="password" name="password2" placeholder="再次输入密码" required>
+
+      <button type="submit">注 册</button>
+    </form>
+  </div>
+
+  <p class="footer">围棋培训管理系统 &copy; 2025</p>
+</div>
+
+<script>
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach((t, i) => {
+    t.classList.toggle('active', (i === 0 && tab === 'login') || (i === 1 && tab === 'register'));
+  });
+  document.getElementById('panel_login').classList.toggle('active', tab === 'login');
+  document.getElementById('panel_register').classList.toggle('active', tab === 'register');
+}
+function selectRole(el, value) {
+  document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('reg_user_type').value = value;
+}
+
+// 注册后若有错误信息，自动切回注册标签
+{% if messages %}
+  {% for msg in messages %}
+    {% if 'register' in msg.tags %}
+    switchTab('register');
+    {% endif %}
+  {% endfor %}
+{% endif %}
+</script>
+</body>
+</html>

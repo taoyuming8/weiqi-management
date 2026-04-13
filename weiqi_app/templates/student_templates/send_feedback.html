@@ -1,0 +1,35 @@
+{% extends 'student_templates/base.html' %}
+{% block content %}
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+  <div class="card">
+    <div class="card-title">发送反馈给管理员</div>
+    <form method="post">
+      {% csrf_token %}
+      <div class="form-group">
+        <label>反馈内容</label>
+        <textarea name="feedback" rows="6" placeholder="请输入您的问题或建议..."
+          style="width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:7px;font-size:14px;font-family:inherit;resize:vertical" required></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary">发送反馈</button>
+    </form>
+  </div>
+  <div class="card">
+    <div class="card-title">我的反馈记录</div>
+    {% for f in feedbacks %}
+    <div style="padding:14px 0;border-bottom:1px solid #f0f0f0">
+      <div style="font-size:14px;color:#333">{{ f.feedback }}</div>
+      {% if f.feedback_reply %}
+      <div style="margin-top:8px;padding:8px 12px;background:#f0fdf4;border-radius:6px;font-size:13px;color:#166534">
+        💬 管理员回复：{{ f.feedback_reply }}
+      </div>
+      {% else %}
+      <div style="margin-top:6px;font-size:12px;color:#aaa">等待管理员回复...</div>
+      {% endif %}
+      <div style="font-size:11px;color:#ccc;margin-top:4px">{{ f.created_at|date:"Y-m-d H:i" }}</div>
+    </div>
+    {% empty %}
+    <p style="color:#aaa;text-align:center;padding:20px">暂无反馈记录</p>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

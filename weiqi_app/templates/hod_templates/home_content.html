@@ -1,0 +1,77 @@
+{% extends 'hod_templates/base.html' %}
+{% block content %}
+
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-icon blue">🧒</div>
+    <div class="stat-info">
+      <div class="num">{{ student_count }}</div>
+      <div class="label">在籍学员</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon green">👨‍🏫</div>
+    <div class="stat-info">
+      <div class="num">{{ coach_count }}</div>
+      <div class="label">教练人数</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon orange">📚</div>
+    <div class="stat-info">
+      <div class="num">{{ class_count }}</div>
+      <div class="label">班级数量</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon purple">📖</div>
+    <div class="stat-info">
+      <div class="num">{{ subject_count }}</div>
+      <div class="label">课程数量</div>
+    </div>
+  </div>
+</div>
+
+<div style="display:grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+  <div class="stat-card">
+    <div class="stat-icon blue">✅</div>
+    <div class="stat-info">
+      <div class="num">{{ attend_present }} <span style="font-size:14px;color:#888">/ {{ total_attendance }}</span></div>
+      <div class="label">出勤 / 总考勤</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon red">⏳</div>
+    <div class="stat-info">
+      <div class="num">{{ pending_leave }}</div>
+      <div class="label">待审核请假</div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">各班级学员分布</div>
+  <canvas id="classChart" height="100"></canvas>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script>
+const ctx = document.getElementById('classChart').getContext('2d');
+new Chart(ctx, {
+  type: 'bar',
+  data: {
+    labels: {{ class_names_json|safe }},
+    datasets: [{
+      label: '学员人数',
+      data: {{ class_counts_json|safe }},
+      backgroundColor: '#1a1a2e',
+      borderRadius: 6,
+    }]
+  },
+  options: {
+    plugins: { legend: { display: false } },
+    scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+  }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,81 @@
+{% extends 'coach_templates/base.html' %}
+{% block content %}
+<div class="card">
+  <div class="card-title">选择课程</div>
+  <div class="form-group" style="max-width:400px">
+    <label>课程</label>
+    <select id="subject_select">
+      <option value="">-- 请选择课程 --</option>
+      {% for s in subjects %}
+        <option value="{{ s.id }}">{{ s.name }}（{{ s.class_level }}）</option>
+      {% endfor %}
+    </select>
+  </div>
+  <button class="btn btn-primary" onclick="loadStudents()">📋 加载学员名单</button>
+</div>
+
+<div id="result_section" style="display:none">
+  <div class="card">
+    <div class="card-title">录入成绩</div>
+    <form method="post" action="/save_result">
+      {% csrf_token %}
+      <input type="hidden" name="subject_id" id="hidden_subject">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th><th>学员</th><th>当前段位</th>
+            <th>平时分（满100）</th><th>考核分（满100）</th><th>晋升段位（可选）</th>
+          </tr>
+        </thead>
+        <tbody id="result_tbody"></tbody>
+      </table>
+      <div style="margin-top:20px">
+        <button type="submit" class="btn btn-success">💾 保存成绩</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+const RANKS = ['未定级','30K','25K','20K','15K','10K','5K','1K','1D','2D','3D','4D','5D'];
+function rankOptions(current) {
+  return RANKS.map(r =>
+    `<option value="${r}" ${r===current?'selected':''}>${r}</option>`
+  ).join('');
+}
+function loadStudents() {
+  const subject = document.getElementById('subject_select').value;
+  if (!subject) { alert('请选择课程'); return; }
+  fetch(`/get_students_for_result?subject=${subject}`)
+    .then(r => r.json())
+    .then(data => {
+      if (data.error) { alert('加载失败'); return; }
+      const tbody = document.getElementById('result_tbody');
+      tbody.innerHTML = '';
+      data.students.forEach((s, i) => {
+        tbody.innerHTML += `
+          <tr>
+            <td>${i+1}</td>
+            <td>${s.name}<input type="hidden" name="student_ids" value="${s.id}"></td>
+            <td><span class="badge badge-info">${s.rank}</span></td>
+            <td><input type="number" name="test_${s.id}" value="${s.test_score}"
+                 min="0" max="100" step="0.5"
+                 style="width:90px;padding:6px;border:1px solid #ddd;border-radius:6px"></td>
+            <td><input type="number" name="exam_${s.id}" value="${s.exam_score}"
+                 min="0" max="100" step="0.5"
+                 style="width:90px;padding:6px;border:1px solid #ddd;border-radius:6px"></td>
+            <td>
+              <select name="rank_${s.id}"
+                style="padding:6px;border:1px solid #ddd;border-radius:6px;font-size:13px">
+                <option value="">— 不变 —</option>
+                ${rankOptions(s.rank)}
+              </select>
+            </td>
+          </tr>`;
+      });
+      document.getElementById('hidden_subject').value = subject;
+      document.getElementById('result_section').style.display = 'block';
+    });
+}
+</script>
+{% endblock %}

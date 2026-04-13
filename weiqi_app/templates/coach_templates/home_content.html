@@ -1,0 +1,55 @@
+{% extends 'coach_templates/base.html' %}
+{% block content %}
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-icon blue">🧒</div>
+    <div class="stat-info">
+      <div class="num">{{ total_students }}</div>
+      <div class="label">我的学员</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon green">📖</div>
+    <div class="stat-info">
+      <div class="num">{{ total_subjects }}</div>
+      <div class="label">负责课程</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon orange">✅</div>
+    <div class="stat-info">
+      <div class="num">{{ attend_present }} <span style="font-size:14px;color:#888">/ {{ total_attendance }}</span></div>
+      <div class="label">出勤 / 总考勤</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon teal">⏳</div>
+    <div class="stat-info">
+      <div class="num">{{ pending_leave }}</div>
+      <div class="label">待处理请假</div>
+    </div>
+  </div>
+</div>
+
+{% if notifications %}
+<div class="card">
+  <div class="card-title">最新通知</div>
+  {% for n in notifications %}
+  <div style="padding:10px 0;border-bottom:1px solid #f5f5f5;font-size:14px;color:#444">
+    🔔 {{ n.message }}
+    <span style="font-size:12px;color:#aaa;margin-left:8px">{{ n.created_at|date:"m-d H:i" }}</span>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<div class="card">
+  <div class="card-title">快捷操作</div>
+  <div style="display:flex;gap:12px;flex-wrap:wrap">
+    <a href="/take_attendance" class="btn btn-primary">✅ 记录今日考勤</a>
+    <a href="/add_result" class="btn btn-success">📊 录入成绩</a>
+    <a href="/coach_apply_leave" class="btn btn-warning">📋 申请请假</a>
+    <a href="/coach_send_feedback" class="btn" style="background:#e3f2fd;color:#1565c0">💬 发送反馈</a>
+  </div>
+</div>
+{% endblock %}

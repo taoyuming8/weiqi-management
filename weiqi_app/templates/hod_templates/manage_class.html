@@ -1,0 +1,31 @@
+{% extends 'hod_templates/base.html' %}
+{% block content %}
+<div class="card">
+  <div class="card-title">
+    班级列表
+    <a href="/add_class" class="btn btn-primary">＋ 添加班级</a>
+  </div>
+  <table>
+    <thead>
+      <tr><th>#</th><th>班级名称</th><th>创建时间</th><th>操作</th></tr>
+    </thead>
+    <tbody>
+      {% for c in classes %}
+      <tr>
+        <td>{{ forloop.counter }}</td>
+        <td>{{ c.name }}</td>
+        <td>{{ c.created_at|date:"Y-m-d" }}</td>
+        <td>
+          <a href="/edit_class/{{ c.id }}" class="btn btn-warning btn-sm">编辑</a>
+          <a href="/delete_class/{{ c.id }}"
+             onclick="return confirm('确认删除班级「{{ c.name }}」？')"
+             class="btn btn-danger btn-sm">删除</a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="4" style="text-align:center;color:#aaa;padding:30px">暂无班级</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

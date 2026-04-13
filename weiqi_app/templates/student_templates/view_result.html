@@ -1,0 +1,26 @@
+{% extends 'student_templates/base.html' %}
+{% block content %}
+<div class="card">
+  <div class="card-title">我的全部成绩</div>
+  <table>
+    <thead>
+      <tr><th>#</th><th>课程</th><th>平时分</th><th>考核分</th><th>综合</th><th>晋升段位</th><th>日期</th></tr>
+    </thead>
+    <tbody>
+      {% for r in results %}
+      <tr>
+        <td>{{ forloop.counter }}</td>
+        <td>{{ r.subject.name }}</td>
+        <td>{{ r.test_score }}</td>
+        <td>{{ r.exam_score }}</td>
+        <td><b>{{ r.test_score|add:r.exam_score|floatformat:1 }}</b></td>
+        <td>{% if r.new_rank %}<span class="rank-badge">{{ r.new_rank }}</span>{% else %}—{% endif %}</td>
+        <td style="color:#aaa;font-size:13px">{{ r.created_at|date:"Y-m-d" }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="7" style="text-align:center;color:#aaa;padding:30px">暂无成绩记录</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

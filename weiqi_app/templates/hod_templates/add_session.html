@@ -1,0 +1,21 @@
+{% extends 'hod_templates/base.html' %}
+{% block content %}
+<div class="card" style="max-width:440px">
+  <div class="card-title">添加训练期</div>
+  <form method="post">
+    {% csrf_token %}
+    <div class="form-group">
+      <label>开始日期</label>
+      <input type="date" name="session_start" required>
+    </div>
+    <div class="form-group">
+      <label>结束日期</label>
+      <input type="date" name="session_end" required>
+    </div>
+    <div style="display:flex;gap:12px">
+      <button type="submit" class="btn btn-primary">确认添加</button>
+      <a href="/manage_session" class="btn" style="background:#eee;color:#444">取消</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends 'hod_templates/base.html' %}
+{% block content %}
+<div class="card" style="max-width:400px">
+  <div class="card-title">编辑班级</div>
+  <form method="post">
+    {% csrf_token %}
+    <div class="form-group">
+      <label>班级名称</label>
+      <input type="text" name="name" value="{{ class.name }}" required>
+    </div>
+    <div style="display:flex;gap:12px">
+      <button type="submit" class="btn btn-primary">保存修改</button>
+      <a href="/manage_class" class="btn" style="background:#eee;color:#444">取消</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

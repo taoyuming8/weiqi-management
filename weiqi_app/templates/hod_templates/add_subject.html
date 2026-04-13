@@ -1,0 +1,35 @@
+{% extends 'hod_templates/base.html' %}
+{% block content %}
+<div class="card" style="max-width:500px">
+  <div class="card-title">添加课程</div>
+  <form method="post">
+    {% csrf_token %}
+    <div class="form-group">
+      <label>课程名称</label>
+      <input type="text" name="name" placeholder="例：布局基础、死活题训练、中盘战斗" required>
+    </div>
+    <div class="form-group">
+      <label>所属班级</label>
+      <select name="class_id" required>
+        <option value="">-- 请选择 --</option>
+        {% for c in classes %}
+          <option value="{{ c.id }}">{{ c.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-group">
+      <label>负责教练</label>
+      <select name="coach_id">
+        <option value="">-- 暂不指定 --</option>
+        {% for c in coaches %}
+          <option value="{{ c.id }}">{{ c }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div style="display:flex;gap:12px">
+      <button type="submit" class="btn btn-primary">确认添加</button>
+      <a href="/manage_subject" class="btn" style="background:#eee;color:#444">取消</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

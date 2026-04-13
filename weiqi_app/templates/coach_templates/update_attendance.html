@@ -1,0 +1,104 @@
+{% extends 'coach_templates/base.html' %}
+{% block content %}
+<div class="card">
+  <div class="card-title">选择课程查看历史考勤</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+    <div class="form-group" style="margin:0">
+      <label>选择课程</label>
+      <select id="subject_select">
+        <option value="">-- 请选择课程 --</option>
+        {% for s in subjects %}
+          <option value="{{ s.id }}">{{ s.name }}（{{ s.class_level }}）</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-group" style="margin:0">
+      <label>选择训练期</label>
+      <select id="session_select">
+        <option value="">-- 请选择训练期 --</option>
+        {% for s in sessions %}
+          <option value="{{ s.id }}">{{ s }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+  <button class="btn btn-primary" onclick="loadDates()">🔍 查询考勤日期</button>
+</div>
+
+<div id="dates_section" style="display:none">
+  <div class="card">
+    <div class="card-title">选择考勤日期</div>
+    <select id="date_select" style="padding:9px 12px;border:1px solid #ddd;border-radius:7px;font-size:14px;width:300px">
+      <option value="">-- 请选择日期 --</option>
+    </select>
+    <button class="btn btn-primary" style="margin-left:12px" onclick="loadDetail()">加载名单</button>
+  </div>
+</div>
+
+<div id="detail_section" style="display:none">
+  <div class="card">
+    <div class="card-title" id="detail_title">考勤详情</div>
+    <form method="post" action="/save_update_attendance">
+      {% csrf_token %}
+      <input type="hidden" name="attendance_id" id="hidden_attendance_id">
+      <table>
+        <thead><tr><th>#</th><th>学员姓名</th><th>出勤状态</th></tr></thead>
+        <tbody id="detail_tbody"></tbody>
+      </table>
+      <div style="margin-top:20px">
+        <button type="submit" class="btn btn-success">💾 保存修改</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+function loadDates() {
+  const subject = document.getElementById('subject_select').value;
+  const session = document.getElementById('session_select').value;
+  if (!subject || !session) { alert('请选择课程和训练期'); return; }
+  fetch(`/get_attendance_dates?subject=${subject}&session=${session}`)
+    .then(r => r.json())
+    .then(data => {
+      const sel = document.getElementById('date_select');
+      sel.innerHTML = '<option value="">-- 请选择日期 --</option>';
+      data.dates.forEach(d => {
+        sel.innerHTML += `<option value="${d.id}">${d.date}</option>`;
+      });
+      document.getElementById('dates_section').style.display = 'block';
+      document.getElementById('detail_section').style.display = 'none';
+    });
+}
+function loadDetail() {
+  const aid = document.getElementById('date_select').value;
+  if (!aid) { alert('请选择日期'); return; }
+  fetch(`/get_attendance_students?attendance_id=${aid}`)
+    .then(r => r.json())
+    .then(data => {
+      const tbody = document.getElementById('detail_tbody');
+      tbody.innerHTML = '';
+      data.students.forEach((s, i) => {
+        tbody.innerHTML += `
+          <tr>
+            <td>${i+1}</td>
+            <td>${s.name}</td>
+            <td>
+              <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+                <input type="checkbox" name="present_ids" value="${s.id}"
+                  ${s.status ? 'checked' : ''}
+                  style="width:18px;height:18px">
+                <span style="font-size:13px;color:${s.status?'#2e7d32':'#c62828'}">
+                  ${s.status ? '✅ 出勤' : '❌ 缺席'}
+                </span>
+              </label>
+            </td>
+          </tr>`;
+      });
+      document.getElementById('hidden_attendance_id').value = aid;
+      document.getElementById('detail_title').textContent =
+        `考勤详情 — ${document.getElementById('date_select').selectedOptions[0].text}（共 ${data.students.length} 人）`;
+      document.getElementById('detail_section').style.display = 'block';
+    });
+}
+</script>
+{% endblock %}

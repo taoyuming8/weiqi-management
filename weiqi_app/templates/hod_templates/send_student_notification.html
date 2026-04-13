@@ -1,0 +1,46 @@
+{% extends 'hod_templates/base.html' %}
+{% block content %}
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+  <div class="card">
+    <div class="card-title">发送学员通知</div>
+    <form method="post">
+      {% csrf_token %}
+      <div class="form-group">
+        <label>选择学员</label>
+        <select name="student_id" required>
+          <option value="">-- 请选择学员 --</option>
+          {% for s in students %}
+            <option value="{{ s.id }}">
+              {{ s.admin.get_full_name|default:s.admin.username }}
+              （{{ s.class_level|default:"未分班" }}）
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label>通知内容</label>
+        <textarea name="message" rows="4" placeholder="请输入通知内容..."
+          style="width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:7px;font-size:14px;font-family:inherit;resize:vertical" required></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary">发送通知</button>
+    </form>
+  </div>
+  <div class="card">
+    <div class="card-title">学员列表</div>
+    <table>
+      <thead><tr><th>姓名</th><th>班级</th><th>段位</th></tr></thead>
+      <tbody>
+        {% for s in students %}
+        <tr>
+          <td>{{ s.admin.get_full_name|default:s.admin.username }}</td>
+          <td>{{ s.class_level|default:"未分班" }}</td>
+          <td><span class="badge badge-info">{{ s.current_rank }}</span></td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="3" style="text-align:center;color:#aaa;padding:20px">暂无学员</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

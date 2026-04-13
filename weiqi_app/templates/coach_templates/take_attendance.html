@@ -1,0 +1,116 @@
+{% extends 'coach_templates/base.html' %}
+{% block content %}
+<div class="card">
+  <div class="card-title">选择课程和日期</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:20px">
+    <div class="form-group" style="margin:0">
+      <label>选择课程</label>
+      <select id="subject_select">
+        <option value="">-- 请选择课程 --</option>
+        {% for s in subjects %}
+          <option value="{{ s.id }}">{{ s.name }}（{{ s.class_level }}）</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-group" style="margin:0">
+      <label>选择训练期</label>
+      <select id="session_select">
+        <option value="">-- 请选择训练期 --</option>
+        {% for s in sessions %}
+          <option value="{{ s.id }}">{{ s }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-group" style="margin:0">
+      <label>上课日期</label>
+      <input type="date" id="attendance_date">
+    </div>
+  </div>
+  <button class="btn btn-primary" onclick="loadStudents()">📋 加载学员名单</button>
+</div>
+
+<div id="student_section" style="display:none">
+  <div class="card">
+    <div class="card-title" id="attendance_title">学员考勤名单</div>
+    <form method="post" action="/save_attendance" id="attendance_form">
+      {% csrf_token %}
+      <input type="hidden" name="subject_id" id="hidden_subject">
+      <input type="hidden" name="session_year_id" id="hidden_session">
+      <input type="hidden" name="attendance_date" id="hidden_date">
+      <table>
+        <thead>
+          <tr><th>#</th><th>学员姓名</th><th>当前段位</th><th>出勤状态</th></tr>
+        </thead>
+        <tbody id="student_tbody"></tbody>
+      </table>
+      <div style="margin-top:20px">
+        <button type="submit" class="btn btn-success">💾 保存考勤记录</button>
+        <button type="button" class="btn" style="background:#eee;color:#444;margin-left:8px" onclick="checkAll(true)">全部出勤</button>
+        <button type="button" class="btn" style="background:#eee;color:#444;margin-left:8px" onclick="checkAll(false)">全部缺席</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+function loadStudents() {
+  const subject = document.getElementById('subject_select').value;
+  const session = document.getElementById('session_select').value;
+  const date    = document.getElementById('attendance_date').value;
+  if (!subject || !session || !date) {
+    alert('请选择课程、训练期和日期');
+    return;
+  }
+  fetch(`/get_students_for_attendance?subject=${subject}&session=${session}`)
+    .then(r => r.json())
+    .then(data => {
+      if (data.error) { alert('加载失败'); return; }
+      const tbody = document.getElementById('student_tbody');
+      tbody.innerHTML = '';
+      data.students.forEach((s, i) => {
+        tbody.innerHTML += `
+          <tr>
+            <td>${i+1}</td>
+            <td>${s.name}</td>
+            <td><span class="badge badge-info">${s.rank}</span></td>
+            <td>
+              <input type="hidden" name="student_ids" value="${s.id}">
+              <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+                <input type="checkbox" name="present_ids" value="${s.id}"
+                  ${s.status ? 'checked' : ''}
+                  style="width:18px;height:18px;cursor:pointer">
+                <span id="lbl_${s.id}" style="font-size:13px;color:${s.status?'#2e7d32':'#c62828'}">
+                  ${s.status ? '✅ 出勤' : '❌ 缺席'}
+                </span>
+              </label>
+            </td>
+          </tr>`;
+      });
+      // 绑定 checkbox 变化
+      tbody.querySelectorAll('input[type=checkbox]').forEach(cb => {
+        cb.addEventListener('change', function() {
+          const lbl = document.getElementById('lbl_' + this.value);
+          lbl.textContent = this.checked ? '✅ 出勤' : '❌ 缺席';
+          lbl.style.color = this.checked ? '#2e7d32' : '#c62828';
+        });
+      });
+      document.getElementById('hidden_subject').value = subject;
+      document.getElementById('hidden_session').value = session;
+      document.getElementById('hidden_date').value = date;
+      document.getElementById('attendance_title').textContent =
+        `学员考勤名单 — ${date}（共 ${data.students.length} 人）`;
+      document.getElementById('student_section').style.display = 'block';
+    });
+}
+function checkAll(checked) {
+  document.querySelectorAll('#student_tbody input[type=checkbox]').forEach(cb => {
+    cb.checked = checked;
+    const lbl = document.getElementById('lbl_' + cb.value);
+    lbl.textContent = checked ? '✅ 出勤' : '❌ 缺席';
+    lbl.style.color = checked ? '#2e7d32' : '#c62828';
+  });
+}
+// 默认日期设为今天
+document.getElementById('attendance_date').valueAsDate = new Date();
+</script>
+{% endblock %}

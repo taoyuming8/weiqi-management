@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ page_title }} — 围棋培训管理系统</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Microsoft YaHei', sans-serif; background: #f0f2f5; color: #222; display: flex; min-height: 100vh; }
+
+    /* 侧边栏 */
+    .sidebar {
+      width: 220px; min-height: 100vh;
+      background: #1a1a2e; color: #ccc;
+      display: flex; flex-direction: column;
+      position: fixed; top: 0; left: 0; z-index: 100;
+    }
+    .sidebar-brand {
+      padding: 24px 20px 16px;
+      font-size: 16px; font-weight: 700;
+      color: #fff; border-bottom: 1px solid #2d2d4e;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .sidebar-brand .stone { font-size: 22px; }
+    .sidebar-section {
+      font-size: 11px; color: #666;
+      padding: 16px 20px 4px;
+      text-transform: uppercase; letter-spacing: 1px;
+    }
+    .sidebar a {
+      display: flex; align-items: center; gap: 8px;
+      padding: 10px 20px; color: #bbb;
+      text-decoration: none; font-size: 14px;
+      transition: background .15s, color .15s;
+    }
+    .sidebar a:hover, .sidebar a.active {
+      background: #2d2d4e; color: #fff;
+    }
+    .sidebar a .icon { width: 18px; text-align: center; }
+
+    /* 主区域 */
+    .main { margin-left: 220px; flex: 1; display: flex; flex-direction: column; }
+    .topbar {
+      background: #fff; padding: 14px 28px;
+      display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 1px solid #e8e8e8;
+      position: sticky; top: 0; z-index: 50;
+    }
+    .topbar h2 { font-size: 18px; font-weight: 600; color: #1a1a2e; }
+    .topbar .user-info { font-size: 13px; color: #666; display: flex; align-items: center; gap: 12px; }
+    .topbar .user-info a { color: #e74c3c; text-decoration: none; font-size: 13px; }
+    .content { padding: 28px; flex: 1; }
+
+    /* 消息提示 */
+    .messages { margin-bottom: 20px; }
+    .alert {
+      padding: 12px 16px; border-radius: 8px;
+      margin-bottom: 8px; font-size: 14px;
+    }
+    .alert-success { background: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7; }
+    .alert-error   { background: #ffebee; color: #c62828; border: 1px solid #ef9a9a; }
+
+    /* 统计卡片 */
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 28px; }
+    .stat-card {
+      background: #fff; border-radius: 10px; padding: 20px 24px;
+      display: flex; align-items: center; gap: 16px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.06);
+    }
+    .stat-icon { width: 48px; height: 48px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 22px; }
+    .stat-icon.blue   { background: #e3f2fd; }
+    .stat-icon.green  { background: #e8f5e9; }
+    .stat-icon.orange { background: #fff3e0; }
+    .stat-icon.purple { background: #f3e5f5; }
+    .stat-icon.red    { background: #ffebee; }
+    .stat-info .num  { font-size: 28px; font-weight: 700; color: #1a1a2e; line-height: 1; }
+    .stat-info .label{ font-size: 13px; color: #888; margin-top: 4px; }
+
+    /* 通用卡片 */
+    .card {
+      background: #fff; border-radius: 10px; padding: 24px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.06); margin-bottom: 20px;
+    }
+    .card-title {
+      font-size: 16px; font-weight: 600; color: #1a1a2e;
+      margin-bottom: 16px; padding-bottom: 12px;
+      border-bottom: 1px solid #f0f0f0;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+
+    /* 表格 */
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th { background: #f8f9fa; padding: 10px 14px; text-align: left; font-weight: 600; color: #555; border-bottom: 2px solid #e8e8e8; }
+    td { padding: 10px 14px; border-bottom: 1px solid #f0f0f0; color: #333; }
+    tr:hover td { background: #fafafa; }
+
+    /* 按钮 */
+    .btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 8px 16px; border-radius: 6px; font-size: 13px;
+      cursor: pointer; border: none; text-decoration: none;
+      font-family: inherit; transition: opacity .15s;
+    }
+    .btn:hover { opacity: .85; }
+    .btn-primary { background: #1a1a2e; color: #fff; }
+    .btn-success { background: #2e7d32; color: #fff; }
+    .btn-warning { background: #f57c00; color: #fff; }
+    .btn-danger  { background: #c62828; color: #fff; }
+    .btn-sm { padding: 5px 10px; font-size: 12px; }
+
+    /* 表单 */
+    .form-group { margin-bottom: 18px; }
+    .form-group label { display: block; font-size: 13px; font-weight: 600; color: #444; margin-bottom: 6px; }
+    .form-group input, .form-group select, .form-group textarea {
+      width: 100%; padding: 9px 12px; border: 1px solid #ddd;
+      border-radius: 7px; font-size: 14px; font-family: inherit;
+      outline: none; transition: border-color .2s;
+    }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: #1a1a2e; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+    /* 徽章 */
+    .badge { padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+    .badge-success { background: #e8f5e9; color: #2e7d32; }
+    .badge-warning { background: #fff8e1; color: #f57c00; }
+    .badge-danger  { background: #ffebee; color: #c62828; }
+    .badge-info    { background: #e3f2fd; color: #1565c0; }
+  </style>
+</head>
+<body>
+
+<nav class="sidebar">
+  <div class="sidebar-brand">
+    <span class="stone">⚫</span>
+    <span>围棋培训系统</span>
+  </div>
+
+  <div class="sidebar-section">主菜单</div>
+  <a href="/admin_home">
+    <span class="icon">🏠</span> 首页总览
+  </a>
+
+  <div class="sidebar-section">人员管理</div>
+  <a href="/manage_coach">
+    <span class="icon">👨‍🏫</span> 教练管理
+  </a>
+  <a href="/manage_student">
+    <span class="icon">🧒</span> 学员管理
+  </a>
+
+  <div class="sidebar-section">课程设置</div>
+  <a href="/manage_class">
+    <span class="icon">📚</span> 班级管理
+  </a>
+  <a href="/manage_subject">
+    <span class="icon">📖</span> 课程管理
+  </a>
+  <a href="/manage_session">
+    <span class="icon">📅</span> 训练期
+  </a>
+
+  <div class="sidebar-section">审核 & 通知</div>
+  <a href="/student_leave_view">
+    <span class="icon">📋</span> 学员请假
+  </a>
+  <a href="/coach_leave_view">
+    <span class="icon">📋</span> 教练请假
+  </a>
+  <a href="/view_student_feedback">
+    <span class="icon">💬</span> 学员反馈
+  </a>
+  <a href="/view_coach_feedback">
+    <span class="icon">💬</span> 教练反馈
+  </a>
+  <a href="/send_student_notification">
+    <span class="icon">🔔</span> 发送通知
+  </a>
+</nav>
+
+<div class="main">
+  <div class="topbar">
+    <h2>{{ page_title }}</h2>
+    <div class="user-info">
+      <span>👤 {{ request.user.get_full_name|default:request.user.username }}（管理员）</span>
+      <a href="/logout_user">退出登录</a>
+    </div>
+  </div>
+  <div class="content">
+    {% if messages %}
+    <div class="messages">
+      {% for msg in messages %}
+        <div class="alert {% if msg.tags == 'error' %}alert-error{% else %}alert-success{% endif %}">
+          {{ msg }}
+        </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    {% block content %}{% endblock %}
+  </div>
+</div>
+
+</body>
+</html>
