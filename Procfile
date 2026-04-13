@@ -1,1 +1,1 @@
-﻿web: python manage.py migrate && gunicorn weiqi_management.wsgi
+﻿web: python manage.py migrate && python manage.py collectstatic --noinput && gunicorn weiqi_management.wsgi
